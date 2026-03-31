@@ -1,12 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        AWS_ACCESS_KEY_ID = 'ASIA5CKZFZM4ACLLZ4Z2'
-        AWS_SECRET_ACCESS_KEY = 'QivLK43fGa/iC7i8NuMBcPPM+q9gmHM9nxLVSZCA'
-        AWS_DEFAULT_REGION = 'us-east-1'
-    }
-
     stages {
 
 
@@ -21,12 +15,24 @@ pipeline {
         }
 
         stage('DVC Pull') {
-            steps {
-                sh '''
-                . venv/bin/activate
-                dvc pull
-                '''
-            }
+                steps {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+                        string(credentialsId: 'aws-session-token', variable: 'AWS_SESSION_TOKEN')
+                    ]) {
+                        sh '''
+                        . venv/bin/activate
+
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+                        export AWS_DEFAULT_REGION=us-east-1
+
+                        dvc pull
+                        '''
+                    }
+                }
         }
 
         stage('Train Model + MLflow') {
