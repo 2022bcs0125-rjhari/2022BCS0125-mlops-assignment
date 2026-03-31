@@ -4,15 +4,22 @@ pipeline {
     stages {
 
         stage('Install Dependencies') {
-            steps {
-                sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install -r requirements.txt
-                pip install awscli dvc[s3]
-                '''
-            }
-        }
+    steps {
+        sh '''
+        python3 -m venv venv
+        . venv/bin/activate
+
+        pip install --upgrade pip
+
+        pip install \
+            fastapi uvicorn pandas numpy scikit-learn mlflow joblib python-multipart \
+            "dvc[s3]==3.30.3" \
+            "awscli==1.29.62" \
+            "s3fs==2023.6.0" \
+            "aiobotocore==2.5.0"
+        '''
+    }
+}
 
         stage('Configure AWS') {
             steps {
