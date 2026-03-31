@@ -75,23 +75,23 @@ jobs:
         path: models/model.pkl
 
     - name: Generate Summary
-  run: |
-    echo "Current dir:"
-    pwd
-    echo "Files:"
-    ls -la
+      run: |
+        echo "Current dir:"
+        pwd
+        echo "Files:"
+        ls -la
 
-    echo "# Experiment Summary" >> $GITHUB_STEP_SUMMARY
-    echo "" >> $GITHUB_STEP_SUMMARY
-    echo "**Name:** R J Hari" >> $GITHUB_STEP_SUMMARY
-    echo "**Roll Number:** 2022BCS0125" >> $GITHUB_STEP_SUMMARY
-    echo "" >> $GITHUB_STEP_SUMMARY
+        echo "# Experiment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Name:** R J Hari" >> $GITHUB_STEP_SUMMARY
+        echo "**Roll Number:** 2022BCS0125" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
 
-    echo "## Metrics" >> $GITHUB_STEP_SUMMARY
+        echo "## Metrics" >> $GITHUB_STEP_SUMMARY
 
-    if [ -f metrics.json ]; then
-      echo "metrics.json found " >> $GITHUB_STEP_SUMMARY
-      cat metrics.json >> $GITHUB_STEP_SUMMARY
-    else
-      echo "metrics.json NOT found" >> $GITHUB_STEP_SUMMARY
-    fi
+        if [ -f metrics.json ]; then
+          echo "metrics.json found " >> $GITHUB_STEP_SUMMARY
+          cat metrics.json >> $GITHUB_STEP_SUMMARY
+        else
+          echo "metrics.json NOT found" >> $GITHUB_STEP_SUMMARY
+        fi
