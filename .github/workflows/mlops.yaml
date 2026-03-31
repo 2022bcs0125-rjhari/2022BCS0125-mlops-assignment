@@ -54,3 +54,16 @@ jobs:
       run: |
         echo "Generated Metrics:"
         cat metrics.json || echo "metrics.json not found"
+        # 7️⃣ Upload MLflow results
+    - name: Upload MLflow results
+      uses: actions/upload-artifact@v4
+      with:
+        name: mlruns
+        path: mlruns/
+
+    # 8️⃣ Upload Metrics file
+    - name: Upload Metrics
+      uses: actions/upload-artifact@v4
+      with:
+        name: metrics
+        path: metrics.json
