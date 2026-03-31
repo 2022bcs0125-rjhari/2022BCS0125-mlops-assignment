@@ -84,20 +84,20 @@ jobs:
           echo ""
           echo "---"
           echo ""
-          echo "## 📊 Metrics"
+          echo "##  Metrics"
 
           if [ -f metrics.json ]; then
             echo '```json'
             cat metrics.json
             echo '```'
           else
-            echo "❌ metrics.json not found"
+            echo " metrics.json not found"
           fi
 
           echo ""
           echo "---"
           echo ""
-          echo "## 📦 Artifacts"
+          echo "##  Artifacts"
           echo "- models/model.pkl"
           echo "- metrics.json"
           echo "- mlruns/"
