@@ -1,10 +1,7 @@
 pipeline {
     agent any
 
-
-
     stages {
-
 
         stage('Install Dependencies') {
             steps {
@@ -12,28 +9,56 @@ pipeline {
                 python3 -m venv venv
                 . venv/bin/activate
                 pip install -r requirements.txt
+                pip install awscli dvc[s3]
                 '''
             }
         }
+
+        stage('Configure AWS') {
+            steps {
+                sh '''
+                mkdir -p ~/.aws
+
+                cat <<EOF > ~/.aws/credentials
+[default]
+aws_access_key_id=YOUR_ACCESS_KEY
+aws_secret_access_key=YOUR_SECRET_KEY
+aws_session_token=YOUR_SESSION_TOKEN
+EOF
+
+                cat <<EOF > ~/.aws/config
+[default]
+region=us-east-1
+EOF
+
+                echo "AWS CONFIG:"
+                cat ~/.aws/credentials
+                cat ~/.aws/config
+                '''
+            }
+        }
+
+        stage('Test AWS Connection') {
+            steps {
+                sh '''
+                . venv/bin/activate
+                aws s3 ls s3://2022bcs0125-mlops-assignment
+                '''
+            }
+        }
+
         stage('DVC Pull') {
-    steps {
-        sh '''
-        . venv/bin/activate
+            steps {
+                sh '''
+                . venv/bin/activate
 
-        export AWS_ACCESS_KEY_ID='YOUR_KEY'
-        export AWS_SECRET_ACCESS_KEY='YOUR_SECRET'
-        export AWS_SESSION_TOKEN='YOUR_TOKEN'
-        export AWS_DEFAULT_REGION='us-east-1'
+                export AWS_EC2_METADATA_DISABLED=true
+                export DVC_NO_ANALYTICS=1
 
-        # IMPORTANT FIX
-        export AWS_EC2_METADATA_DISABLED=true
-        export DVC_NO_ANALYTICS=1
-
-        # Force sync (no async s3fs issues)
-        dvc pull --jobs 1 -v
-        '''
-    }
-}
+                dvc pull --jobs 1 -v
+                '''
+            }
+        }
 
         stage('Train Model + MLflow') {
             steps {
