@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib
-
+import numpy as np
 from preprocess import preprocess
 
 ROLL_NO = "2022BCS0125"
@@ -33,7 +33,7 @@ def train():
 
         preds = model.predict(X_test)
 
-        rmse = mean_squared_error(y_test, preds, squared=False)
+        rmse = np.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
 
         # Log to MLflow
