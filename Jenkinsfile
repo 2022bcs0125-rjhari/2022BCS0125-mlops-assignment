@@ -17,21 +17,21 @@ pipeline {
         }
         stage('DVC Pull') {
     steps {
-        withCredentials([
-            string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
-            string(credentialsId: 'aws-session-token', variable: 'AWS_SESSION_TOKEN')
-        ]) {
-            sh '''
-            . venv/bin/activate
+        sh '''
+        . venv/bin/activate
 
-            export AWS_DEFAULT_REGION=us-east-1
+        export AWS_ACCESS_KEY_ID='YOUR_KEY'
+        export AWS_SECRET_ACCESS_KEY='YOUR_SECRET'
+        export AWS_SESSION_TOKEN='YOUR_TOKEN'
+        export AWS_DEFAULT_REGION='us-east-1'
 
-            env | grep AWS   # debug
+        # IMPORTANT FIX
+        export AWS_EC2_METADATA_DISABLED=true
+        export DVC_NO_ANALYTICS=1
 
-            dvc pull -v
-            '''
-        }
+        # Force sync (no async s3fs issues)
+        dvc pull --jobs 1 -v
+        '''
     }
 }
 
