@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import joblib
 import numpy as np
+import os
 from preprocess import preprocess
 
 ROLL_NO = "2022BCS0125"
@@ -45,6 +46,8 @@ def train():
         mlflow.sklearn.log_model(model, "model")
 
         # Save model
+
+        os.makedirs("models", exist_ok=True)
         joblib.dump(model, "models/model.pkl")
 
         print(f"RMSE: {rmse}, R2: {r2}")
