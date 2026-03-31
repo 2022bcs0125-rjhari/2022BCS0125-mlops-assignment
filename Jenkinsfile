@@ -2,16 +2,16 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_DEFAULT_REGION = 'ap-south-1'
+        AWS_ACCESS_KEY_ID = 'ASIA5CKZFZM4ACLLZ4Z2'
+        AWS_SECRET_ACCESS_KEY = 'QivLK43fGa/iC7i8NuMBcPPM+q9gmHM9nxLVSZCA'
+        AWS_DEFAULT_REGION = 'us-east-1'
     }
 
     stages {
 
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/your-username/your-repo.git'
+                git 'https://github.com/2022bcs0125-rjhari/2022BCS0125-mlops-assignment.git'
             }
         }
 
