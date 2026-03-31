@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import joblib
-import numpy as np
+import pandas as pd
+from src.preprocess import preprocess
 
 ROLL_NO = "2022BCS0125"
 NAME = "R J Hari"
@@ -21,16 +22,16 @@ def health():
 @app.post("/predict")
 def predict(data: dict):
     try:
-        features = np.array([[
-            data["passenger_count"],
-            data["pickup_hour"],
-            data["distance"]
-        ]])
+        # Convert input to DataFrame
+        df = pd.DataFrame([data])
 
-        prediction = model.predict(features).tolist()
+        # Apply SAME preprocessing
+        X = preprocess(df)
+
+        prediction = model.predict(X)[0]
 
         return {
-            "prediction": prediction,
+            "prediction": float(prediction),
             "Name": NAME,
             "Roll No": ROLL_NO
         }
