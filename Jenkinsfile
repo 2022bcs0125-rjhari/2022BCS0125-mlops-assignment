@@ -1,76 +1,97 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
+        AWS_SESSION_TOKEN = credentials('aws-session-token')
+
+        DOCKER_ACCESS = credentials('docker-access')
+        MLFLOW_TRACKING_URI = "http://localhost:5000"
+        BUCKET_NAME = "2022bcs0125-mlops-assignment"
+    }
+
     stages {
 
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/2022bcs0125-rjhari/2022BCS0125-mlops-assignment.git'
+            }
+        }
+
         stage('Install Dependencies') {
-    steps {
-        sh '''
-        python3 -m venv venv
-        . venv/bin/activate
+            steps {
+                sh '''
+                # Create a virtual environment
+                python3 -m venv venv
 
-        pip install --upgrade pip
+                # Activate virtual environment
+                . venv/bin/activate
 
-        pip install \
-            fastapi uvicorn pandas numpy scikit-learn mlflow joblib python-multipart \
-            "dvc[s3]==3.30.3" \
-            "awscli==1.29.62" \
-            "s3fs==2023.6.0" \
-            "aiobotocore==2.5.0"
-        '''
-    }
-}
+                # Upgrade pip inside venv only
+                pip install --upgrade pip
+
+                # Install project dependencies
+                pip install -r requirements.txt
+                pip install mlflow boto3 dvc[s3] scikit-learn
+                '''
+            }
+        }
 
         stage('Configure AWS') {
             steps {
                 sh '''
-                mkdir -p ~/.aws
+                # Activate virtual environment
+                . venv/bin/activate
 
-                cat <<EOF > ~/.aws/credentials
-[default]
-aws_access_key_id=YOUR_ACCESS_KEY
-aws_secret_access_key=YOUR_SECRET_KEY
-aws_session_token=YOUR_SESSION_TOKEN
-EOF
-
-                cat <<EOF > ~/.aws/config
-[default]
-region=us-east-1
-EOF
-
-                echo "AWS CONFIG:"
-                cat ~/.aws/credentials
-                cat ~/.aws/config
+                # Configure AWS CLI
+                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                aws configure set aws_session_token $AWS_SESSION_TOKEN
+                aws configure set default.region us-east-1
                 '''
             }
         }
 
-        stage('Test AWS Connection') {
+        stage('Start MLflow') {
             steps {
                 sh '''
                 . venv/bin/activate
-                aws s3 ls s3://2022bcs0125-mlops-assignment
+                export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+                mlflow server \
+                    --host 0.0.0.0 \
+                    --port 5000 \
+                    --backend-store-uri sqlite:///mlflow.db \
+                    --default-artifact-root s3://2022bcs0125-mlops-assignment/ &
+                sleep 5
                 '''
             }
         }
 
-        stage('DVC Pull') {
+        stage('Pull Data (DVC)') {
             steps {
                 sh '''
+                # Activate virtual environment
                 . venv/bin/activate
 
-                export AWS_EC2_METADATA_DISABLED=true
-                export DVC_NO_ANALYTICS=1
-
-                dvc pull --jobs 1 -v
+                # Pull dataset from DVC
+                dvc pull
                 '''
             }
         }
 
-        stage('Train Model + MLflow') {
+        stage('Train Model + MLflow Logging') {
             steps {
                 sh '''
+                # Activate virtual environment
                 . venv/bin/activate
+
+                export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+                export MLFLOW_TRACKING_URI=$MLFLOW_TRACKING_URI
                 python src/train.py
                 '''
             }
@@ -79,24 +100,27 @@ EOF
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t yourusername/2022bcs0125-mlops .
+                docker build -t $DOCKER_ACCESS_USR/2022bcs0125-mlops-assignment .
                 '''
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push yourusername/2022bcs0125-mlops
-                    '''
-                }
+                sh '''
+                echo $DOCKER_ACCESS_PSW | docker login -u $DOCKER_ACCESS_USR --password-stdin
+                docker push $DOCKER_ACCESS_USR/2022bcs0125-mlops-assignment
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed!"
         }
     }
 }
