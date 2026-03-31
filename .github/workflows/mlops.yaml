@@ -95,3 +95,10 @@ jobs:
         else
           echo "metrics.json NOT found" >> $GITHUB_STEP_SUMMARY
         fi
+    - name: Build Docker Image
+      run: docker build -t 2022bcs0125rjhari/2022bcs0125-mlops .
+
+    - name: Push Docker Image
+      run: |
+        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+        docker push 2022bcs0125rjhari/2022bcs0125-mlops
