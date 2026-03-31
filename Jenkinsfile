@@ -27,7 +27,8 @@ pipeline {
 
             export AWS_DEFAULT_REGION=us-east-1
 
-            echo "Running DVC..."
+            env | grep AWS   # debug
+
             dvc pull -v
             '''
         }
