@@ -15,7 +15,7 @@ pipeline {
             }
         }
 
-        stage('DVC Pull') {
+     stage('DVC Pull') {
     steps {
         withCredentials([
             string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
@@ -23,18 +23,22 @@ pipeline {
             string(credentialsId: 'aws-session-token', variable: 'AWS_SESSION_TOKEN')
         ]) {
             sh '''
-            echo "DEBUG CHECK"
+            echo "Setting AWS manually..."
 
-            echo $AWS_ACCESS_KEY_ID
-            echo $AWS_SECRET_ACCESS_KEY
-            echo $AWS_SESSION_TOKEN
+            mkdir -p ~/.aws
+
+            echo "[default]" > ~/.aws/credentials
+            echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
+            echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+            echo "aws_session_token=$AWS_SESSION_TOKEN" >> ~/.aws/credentials
+
+            echo "[default]" > ~/.aws/config
+            echo "region=us-east-1" >> ~/.aws/config
+
+            cat ~/.aws/credentials
+            cat ~/.aws/config
 
             . venv/bin/activate
-
-            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
-            export AWS_DEFAULT_REGION=us-east-1
 
             dvc pull -v
             '''
