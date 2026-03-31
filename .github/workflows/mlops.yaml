@@ -98,7 +98,10 @@ jobs:
     - name: Build Docker Image
       run: docker build -t 2022bcs0125rjhari/2022bcs0125-mlops .
 
+    - name: Login to Docker Hub
+      run: |
+        echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
     - name: Push Docker Image
       run: |
-        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-        docker push 2022bcs0125rjhari/2022bcs0125-mlops
+         docker push ${{ secrets.DOCKER_USER }}/2022bcs0125-mlops
