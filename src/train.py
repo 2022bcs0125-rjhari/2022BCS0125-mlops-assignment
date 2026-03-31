@@ -1,0 +1,54 @@
+import pandas as pd
+import mlflow
+import mlflow.sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+import joblib
+
+from preprocess import preprocess
+
+ROLL_NO = "2022BCS0125"
+NAME = "R J Hari"
+
+mlflow.set_experiment(f"{ROLL_NO}_experiment")
+
+def train():
+    df = pd.read_csv("data/train.csv")
+
+    # Remove extreme outliers
+    df = df[(df["trip_duration"] > 10) & (df["trip_duration"] < 20000)]
+
+    X = preprocess(df)
+    y = df["trip_duration"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    with mlflow.start_run():
+        model = RandomForestRegressor(n_estimators=100, max_depth=10)
+
+        model.fit(X_train, y_train)
+
+        preds = model.predict(X_test)
+
+        rmse = mean_squared_error(y_test, preds, squared=False)
+        r2 = r2_score(y_test, preds)
+
+        # Log to MLflow
+        mlflow.log_param("model", "RandomForest")
+        mlflow.log_param("n_estimators", 100)
+        mlflow.log_metric("rmse", rmse)
+        mlflow.log_metric("r2", r2)
+
+        mlflow.sklearn.log_model(model, "model")
+
+        # Save model
+        joblib.dump(model, "models/model.pkl")
+
+        print(f"RMSE: {rmse}, R2: {r2}")
+
+
+if __name__ == "__main__":
+    train()
