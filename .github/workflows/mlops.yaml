@@ -25,11 +25,10 @@ jobs:
       with:
         python-version: '3.10'
 
-    # 3️⃣ Install Dependencies (FIXED VERSIONS)
+    # 3️⃣ Install Dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-
         pip install \
           pandas numpy scikit-learn mlflow joblib \
           fastapi uvicorn python-multipart \
@@ -38,31 +37,39 @@ jobs:
           "s3fs==2023.6.0" \
           "aiobotocore==2.5.0"
 
-    # 4️⃣ DVC Pull (DATA)
+    # 4️⃣ DVC Pull
     - name: DVC Pull
       run: |
         dvc pull
 
-    # 5️⃣ Train Model + MLflow Logging
+    # 5️⃣ Train Model
     - name: Train Model
       run: |
         python src/train.py
 
-    # 6️⃣ Metrics Output
+    # 6️⃣ Show Metrics
     - name: Show Metrics
       run: |
         echo "Generated Metrics:"
         cat metrics.json || echo "metrics.json not found"
-        Upload MLflow results
+
+    # 7️⃣ Upload MLflow results
     - name: Upload MLflow results
       uses: actions/upload-artifact@v4
       with:
         name: mlruns
         path: mlruns/
 
-    # 8️⃣ Upload Metrics file
+    # 8️⃣ Upload Metrics
     - name: Upload Metrics
       uses: actions/upload-artifact@v4
       with:
         name: metrics
         path: metrics.json
+
+    # 9️⃣ Upload Model
+    - name: Upload Model
+      uses: actions/upload-artifact@v4
+      with:
+        name: model
+        path: models/model.pkl

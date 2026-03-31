@@ -7,12 +7,14 @@ from sklearn.metrics import mean_squared_error, r2_score
 import joblib
 import numpy as np
 import os
+import json
 from preprocess import preprocess
 
 ROLL_NO = "2022BCS0125"
 NAME = "R J Hari"
 
 mlflow.set_experiment(f"{ROLL_NO}_experiment")
+
 
 def train():
     df = pd.read_csv("data/train.csv")
@@ -46,9 +48,43 @@ def train():
         mlflow.sklearn.log_model(model, "model")
 
         # Save model
-
         os.makedirs("models", exist_ok=True)
         joblib.dump(model, "models/model.pkl")
+
+        # Save metrics.json
+        metrics = {
+            "rmse": float(rmse),
+            "r2": float(r2),
+            "name": NAME,
+            "roll_no": ROLL_NO
+        }
+
+        with open("metrics.json", "w") as f:
+            json.dump(metrics, f, indent=4)
+
+        # 🔥 GitHub Actions Workflow Summary
+        summary = f"""
+                #  MLOps Pipeline Results
+
+                ## Student Details
+                - **Name:** {NAME}
+                - **Roll No:** {ROLL_NO}
+
+                ## Metrics
+                - **RMSE:** {rmse:.4f}
+                - **R² Score:** {r2:.4f}
+
+                ##  Artifacts Generated
+                - Model: `models/model.pkl`
+                - Metrics: `metrics.json`
+                - MLflow logs: `mlruns/`
+
+                ---
+                 Pipeline executed successfully
+                """
+
+        with open(os.environ.get("GITHUB_STEP_SUMMARY", "summary.md"), "a") as f:
+            f.write(summary)
 
         print(f"RMSE: {rmse}, R2: {r2}")
 
