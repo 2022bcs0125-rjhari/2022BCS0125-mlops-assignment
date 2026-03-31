@@ -9,11 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repo') {
-            steps {
-                git 'https://github.com/2022bcs0125-rjhari/2022BCS0125-mlops-assignment.git'
-            }
-        }
 
         stage('Install Dependencies') {
             steps {
