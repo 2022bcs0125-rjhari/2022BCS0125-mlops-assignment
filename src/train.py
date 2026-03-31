@@ -62,29 +62,6 @@ def train():
         with open("metrics.json", "w") as f:
             json.dump(metrics, f, indent=4)
 
-        # 🔥 GitHub Actions Workflow Summary
-        summary = f"""
-                #  MLOps Pipeline Results
-
-                ## Student Details
-                - **Name:** {NAME}
-                - **Roll No:** {ROLL_NO}
-
-                ## Metrics
-                - **RMSE:** {rmse:.4f}
-                - **R² Score:** {r2:.4f}
-
-                ##  Artifacts Generated
-                - Model: `models/model.pkl`
-                - Metrics: `metrics.json`
-                - MLflow logs: `mlruns/`
-
-                ---
-                 Pipeline executed successfully
-                """
-
-        with open(os.environ.get("GITHUB_STEP_SUMMARY", "summary.md"), "a") as f:
-            f.write(summary)
 
         print(f"RMSE: {rmse}, R2: {r2}")
 

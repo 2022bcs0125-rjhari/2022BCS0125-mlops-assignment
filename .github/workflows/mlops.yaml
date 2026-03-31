@@ -73,3 +73,26 @@ jobs:
       with:
         name: model
         path: models/model.pkl
+
+    - name: Generate Workflow Summary
+      run: |
+        echo "# Experiment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "**Name:** R J Hari" >> $GITHUB_STEP_SUMMARY
+        echo "**Roll Number:** 2022BCS0125" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "```json" >> $GITHUB_STEP_SUMMARY
+        cat metrics.json >> $GITHUB_STEP_SUMMARY
+        echo "```" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "---" >> $GITHUB_STEP_SUMMARY
+        echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- models/model.pkl" >> $GITHUB_STEP_SUMMARY
+        echo "- metrics.json" >> $GITHUB_STEP_SUMMARY
+        echo "- mlruns/" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        echo "_Job summary generated at run-time_" >> $GITHUB_STEP_SUMMARY
