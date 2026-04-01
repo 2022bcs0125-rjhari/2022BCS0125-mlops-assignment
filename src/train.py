@@ -24,8 +24,8 @@ MODEL_TYPE = "rf"
 USE_SELECTED_FEATURES = True
 
 PARAMS = {
-    "n_estimators": 200,
-    "max_depth": 15
+    "n_estimators": 600,
+    "max_depth": None,
 }
 def train():
 
