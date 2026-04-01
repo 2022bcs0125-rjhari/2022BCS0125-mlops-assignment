@@ -19,14 +19,12 @@ NAME = "R J Hari"
 mlflow.set_experiment(f"{ROLL_NO}_experiment")
 
 # CONFIG (EDIT PER COMMIT) 
-DATA_VERSION = "v1"
+DATA_VERSION = "v2"
 MODEL_TYPE = "ridge"
 USE_SELECTED_FEATURES = False
 
 PARAMS = {
-    "alpha": 0.1,
-    "n_estimators": 100,
-    "max_depth": 10
+    "alpha": 0.1
 }
 def train():
 
