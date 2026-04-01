@@ -14,7 +14,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def preprocess(df):
+def preprocess(df, use_selected_features=False):
     df = df.copy()
 
     # Convert datetime
@@ -30,13 +30,21 @@ def preprocess(df):
         df["dropoff_longitude"]
     )
 
-    # Select features
-    features = [
+    # Feature sets
+    features_all = [
         "passenger_count",
         "pickup_hour",
         "distance"
     ]
 
-    X = df[features]
+    features_selected = [
+        "pickup_hour",
+        "distance"
+    ]
+
+    if use_selected_features:
+        X = df[features_selected]
+    else:
+        X = df[features_all]
 
     return X
