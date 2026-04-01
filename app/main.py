@@ -25,8 +25,12 @@ def predict(data: dict):
         # Convert input to DataFrame
         df = pd.DataFrame([data])
 
-        # Apply SAME preprocessing
-        X = preprocess(df)
+        expected_features = model.n_features_in_
+
+        if expected_features == 2:
+            X = preprocess(df, use_selected_features=True)
+        else:
+            X = preprocess(df, use_selected_features=False)
 
         prediction = model.predict(X)[0]
 
