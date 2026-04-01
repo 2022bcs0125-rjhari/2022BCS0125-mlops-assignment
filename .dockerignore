@@ -1,0 +1,9 @@
+mlruns/
+mlruns_run*/
+data/
+.git/
+.gitignore
+__pycache__/
+*.pyc
+*.pkl
+*.db
