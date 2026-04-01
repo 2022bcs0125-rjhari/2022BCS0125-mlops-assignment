@@ -19,15 +19,13 @@ NAME = "R J Hari"
 mlflow.set_experiment(f"{ROLL_NO}_experiment")
 
 # CONFIG (EDIT PER COMMIT) 
-DATA_VERSION = "v2"
+DATA_VERSION = "v1"
 MODEL_TYPE = "rf"
 USE_SELECTED_FEATURES = True
 
 PARAMS = {
-    "n_estimators": 300,
-    "max_depth": 18,
-    "min_samples_split": 4,
-    "min_samples_leaf": 2
+    "n_estimators": 250,
+    "max_depth": 20
 }
 def train():
 
