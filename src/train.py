@@ -24,8 +24,10 @@ MODEL_TYPE = "rf"
 USE_SELECTED_FEATURES = True
 
 PARAMS = {
-    "n_estimators": 600,
-    "max_depth": None,
+    "n_estimators": 300,
+    "max_depth": 18,
+    "min_samples_split": 4,
+    "min_samples_leaf": 2
 }
 def train():
 
@@ -55,10 +57,13 @@ def train():
         # ================= MODEL =================
         if MODEL_TYPE == "rf":
             model = RandomForestRegressor(
-                n_estimators=PARAMS.get("n_estimators", 100),
-                max_depth=PARAMS.get("max_depth", 10),
-                random_state=42
-            )
+                    n_estimators=PARAMS.get("n_estimators", 100),
+                    max_depth=PARAMS.get("max_depth", 10),
+                    min_samples_split=PARAMS.get("min_samples_split", 2),
+                    min_samples_leaf=PARAMS.get("min_samples_leaf", 1),
+                    random_state=42,
+                    n_jobs=-1
+                )
 
         elif MODEL_TYPE == "ridge":
             from sklearn.linear_model import Ridge
