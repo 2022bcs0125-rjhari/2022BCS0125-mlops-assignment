@@ -52,6 +52,11 @@ jobs:
       run: |
         echo "Generated Metrics:"
         cat metrics.json || echo "metrics.json not found"
+    # 6.5 Ensure MLflow logs are written
+    - name: Verify MLflow logs
+      run: |
+        echo "Checking mlruns structure..."
+        ls -R mlruns || echo "mlruns not found"
 
     # 7 Upload MLflow results
     - name: Upload MLflow results

@@ -10,12 +10,15 @@ import os
 import json
 from preprocess import preprocess
 
+# IMPORTANT: Force MLflow to use local storage
+mlflow.set_tracking_uri("file:./mlruns")
+
 ROLL_NO = "2022BCS0125"
 NAME = "R J Hari"
 
 mlflow.set_experiment(f"{ROLL_NO}_experiment")
 
-# CONFIG (EDIT THIS PER COMMIT)
+# CONFIG (EDIT PER COMMIT) 
 DATA_VERSION = "v1"          # v1 or v2
 MODEL_TYPE = "ridge"         # ridge or rf
 USE_SELECTED_FEATURES = False
@@ -26,10 +29,8 @@ PARAMS = {
     "max_depth": 10
 }
 
-
-
 def train():
-    
+
     # Dataset mapping
     file_map = {
         "v1": "data/train_small.csv",
@@ -48,9 +49,12 @@ def train():
         X, y, test_size=0.2, random_state=42
     )
 
-    with mlflow.start_run():
+    # ✅ IMPORTANT: Proper run naming
+    run_name = f"{MODEL_TYPE}_{DATA_VERSION}_{'selected' if USE_SELECTED_FEATURES else 'all'}"
 
-        # Model selection
+    with mlflow.start_run(run_name=run_name):
+
+        # ================= MODEL =================
         if MODEL_TYPE == "rf":
             model = RandomForestRegressor(
                 n_estimators=PARAMS.get("n_estimators", 100),
@@ -62,15 +66,14 @@ def train():
             from sklearn.linear_model import Ridge
             model = Ridge(alpha=PARAMS.get("alpha", 1.0))
 
-        # Train
+        # ================= TRAIN =================
         model.fit(X_train, y_train)
-
         preds = model.predict(X_test)
 
         rmse = np.sqrt(mean_squared_error(y_test, preds))
         r2 = r2_score(y_test, preds)
 
-        # MLflow logging
+        # ================= LOG PARAMS =================
         mlflow.log_param("data_version", DATA_VERSION)
         mlflow.log_param("model_type", MODEL_TYPE)
         mlflow.log_param("features", "selected" if USE_SELECTED_FEATURES else "all")
@@ -78,16 +81,16 @@ def train():
         for k, v in PARAMS.items():
             mlflow.log_param(k, v)
 
+        # ================= LOG METRICS =================
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
 
-        mlflow.sklearn.log_model(model, "model")
-
-        # Save model
+        # ================= SAVE FILES =================
         os.makedirs("models", exist_ok=True)
-        joblib.dump(model, "models/model.pkl")
 
-        # Save metrics.json
+        model_path = "models/model.pkl"
+        joblib.dump(model, model_path)
+
         metrics = {
             "rmse": float(rmse),
             "r2": float(r2),
@@ -97,6 +100,11 @@ def train():
 
         with open("metrics.json", "w") as f:
             json.dump(metrics, f, indent=4)
+
+        # ================= LOG ARTIFACTS =================
+        mlflow.sklearn.log_model(model, "model")
+        mlflow.log_artifact("metrics.json")
+        mlflow.log_artifact(model_path)
 
         print(f"[{MODEL_TYPE} | {DATA_VERSION}] RMSE: {rmse}, R2: {r2}")
 
