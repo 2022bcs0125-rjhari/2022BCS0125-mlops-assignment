@@ -8,7 +8,7 @@ data/*.zip
 *.dvc.tmp
 
 # MLflow
-mlruns/
+mlruns*/
 
 # Models
 models/
